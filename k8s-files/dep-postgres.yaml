@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safra-postgres
+spec:
+  selector:
+    matchLabels:
+      app: safra-postgres
+  template:
+    metadata:
+      labels:
+        app: safra-postgres
+        safra-net: "true"
+        service: safra-postgres
+    spec:
+      containers:
+        - env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_DB
+              value: safra
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: safra-db-credentials
+                  key: password
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: safra-db-credentials
+                  key: user
+          name: safra-postgres
+          image: postgres:12.17
+          ports:
+            - containerPort: 5432
+          resources:
+            limits:
+              memory: "128Mi"
+          volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: safra-postgres-claim0
+      volumes:
+        - name: safra-postgres-claim0
+          persistentVolumeClaim:
+            claimName: safra-postgres-claim0

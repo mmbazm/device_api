@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-safra-postgres
+  namespace: safra
+  labels:
+    svc: svc-safra-postgres
+spec:
+  selector:
+    app: safra-postgres
+  ports:
+  - port: 5432
+    protocol: TCP

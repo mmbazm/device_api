@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safra-statisticsapi
+  namespace: safra
+spec:
+  selector:
+    matchLabels:
+      app: safra-statisticsapi
+  template:
+    metadata:
+      labels:
+        app: safra-statisticsapi
+    spec:
+      containers:
+        - env:
+            - name: DATABASE_HOST
+              value: svc-safra-postgres
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: safra-db-credentials
+                  key: password
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: safra-db-credentials
+                  key: user
+            - name: DEVICEREGISTRATIONAPI_HOST
+              value: svc-safra-deviceregistrationapi
+            - name: DEVICEREGISTRATIONAPI_PORT
+              value: "80"
+            - name: STATISTICS_USER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: safra-api-userkey
+                  key: userkey
+          name: safra-statisticsapi
+          image: mmb2018/cn-statisticsapi:v1.0.0
+          resources:
+            limits:
+              memory: "128Mi"
+          ports:
+          - containerPort: 80
