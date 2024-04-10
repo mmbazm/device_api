@@ -1,0 +1,60 @@
+---
+version: '3.8'
+services:
+  safra-postgres:
+    image: postgres:12.17
+    container_name: cn-safra-postgresql
+    restart: unless-stopped
+    networks:
+      - safra-net
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_DB: safra
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+
+  app-deviceregistrationapi:
+    image: mmb2018/cn-deviceregister:v1.0.0
+    container_name: cn-safra-deviceregistrationapi
+    restart: unless-stopped
+    networks:
+      - safra-net
+    depends_on:
+      - safra-postgres
+    environment:
+      DEVICEREGISTRATION_USER_KEY: userkey123
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: safra-postgres
+      DATABASE_PORT: 5432
+
+  app-statisticsapi:
+    image: mmb2018/cn-statisticsapi:v1.0.0
+    container_name: cn-safra-statisticsapi
+    restart: unless-stopped
+    networks:
+      - safra-net
+    depends_on:
+      - safra-postgres
+      - app-deviceregistrationapi
+    environment:
+      STATISTICS_USER_KEY: userkey123
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: safra-postgres
+      DATABASE_PORT: 5432
+      DEVICEREGISTRATIONAPI_HOST: app-deviceregistrationapi
+      DEVICEREGISTRATIONAPI_PORT: 80
+    ports:
+      - 5000:80
+
+networks:
+  safra-net:
+    name: safra-net
