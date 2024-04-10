@@ -1,0 +1,5 @@
+Flask==2.2.5
+requests==2.22.0
+requests-unixsocket==0.2.0
+psycopg2-binary==2.9.9
+Werkzeug==2.2.3
